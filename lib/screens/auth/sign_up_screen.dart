@@ -1,70 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:isango_app/core/constants/app_routes.dart';
 import 'package:isango_app/core/theme/app_colors.dart';
+import 'package:isango_app/core/theme/app_radii.dart';
 import 'package:isango_app/core/theme/app_spacing.dart';
 import 'package:isango_app/core/theme/app_text_styles.dart';
 import 'package:isango_app/core/utils/auth_validators.dart';
 import 'package:isango_app/widgets/auth/auth_primary_button.dart';
 import 'package:isango_app/widgets/auth/auth_text_field.dart';
 
-/// Signup screen — UI-only (no backend wiring).
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+typedef SignUpRequest = Future<void> Function({
+  required String displayName,
+  required String email,
+  required String password,
+});
+
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key, this.onSignUp, this.onSignUpComplete});
+
+  final SignUpRequest? onSignUp;
+  final VoidCallback? onSignUpComplete;
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _fullNameController = TextEditingController();
+  final _displayNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
-  bool _isLoading = false;
+  bool _isSubmitting = false;
+  String? _submissionError;
 
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _displayNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  /// Validates the form and simulates a signup network call so the loading
-  /// state is visible. Replace the delay with real auth wiring later.
-  Future<void> _handleSignup() async {
+  Future<void> _handleSubmit() async {
     FocusScope.of(context).unfocus();
+    setState(() => _submissionError = null);
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    // After signup, return to login with a success confirmation.
-    // Wire a real auth flow (and the verify-email screen) later.
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Account created. Please log in.')),
+    setState(() => _isSubmitting = true);
+    try {
+      final hook = widget.onSignUp ?? _defaultSignUpHook;
+      await hook(
+        displayName: _displayNameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
+      if (!mounted) return;
+
+      if (widget.onSignUpComplete != null) {
+        widget.onSignUpComplete!();
+      } else {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Account created. Check your email to verify your account.',
+              ),
+            ),
+          );
+        Navigator.pushReplacementNamed(context, AppRoutes.login);
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _submissionError = _messageForError(error));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  Future<void> _defaultSignUpHook({
+    required String displayName,
+    required String email,
+    required String password,
+  }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+  }
+
+  String _messageForError(Object error) {
+    if (error is SignUpException) return error.message;
+    return 'We could not create your account. Please try again.';
+  }
+
+  void _goToSignIn() {
     Navigator.pushReplacementNamed(context, AppRoutes.login);
   }
 
-  void _goToLogin() {
-    Navigator.pushReplacementNamed(context, AppRoutes.login);
+  void _handleBack() {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      _goToSignIn();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // Cap form width on tablets/desktops for a comfortable reading column.
     final maxWidth = size.width > 520.0 ? 480.0 : size.width;
 
     return Scaffold(
@@ -72,7 +118,7 @@ class _SignupScreenState extends State<SignupScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: _isLoading ? null : _goToLogin,
+          onPressed: _isSubmitting ? null : _handleBack,
         ),
         title: const Text('Create account'),
       ),
@@ -91,46 +137,43 @@ class _SignupScreenState extends State<SignupScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Header copy
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Join Isango community',
-                            style: AppTextStyles.display,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.xs),
-                          Text(
-                            'Create your account to interact with the Isango community.',
-                            style: AppTextStyles.bodyMuted,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                    Text(
+                      'Join the Isango community',
+                      style: AppTextStyles.display,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      'Create an account to follow campus events and save the ones you care about.',
+                      style: AppTextStyles.bodyMuted,
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xl),
 
-                    // Full name
+                    if (_submissionError != null) ...[
+                      _SubmissionErrorBanner(message: _submissionError!),
+                      const SizedBox(height: AppSpacing.md),
+                    ],
+
                     AuthTextField(
-                      controller: _fullNameController,
-                      label: 'Full name',
-                      hint: 'Enter your full name',
+                      controller: _displayNameController,
+                      label: 'Display name',
+                      hint: 'How should we greet you?',
                       icon: Icons.person_outline,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.name],
-                      validator: AuthValidators.fullName,
+                      validator: (value) => AuthValidators.requiredField(
+                        value,
+                        label: 'Display name',
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
 
-                    // Email
                     AuthTextField(
                       controller: _emailController,
                       label: 'Email',
-                      hint: 'Enter your email address',
+                      hint: 'student@ur.ac.rw',
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
@@ -139,11 +182,10 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
 
-                    // Password
                     AuthTextField(
                       controller: _passwordController,
                       label: 'Password',
-                      hint: 'Enter your password',
+                      hint: 'At least 6 characters',
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
@@ -166,7 +208,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
 
-                    // Confirm password — validated against the password field.
                     AuthTextField(
                       controller: _confirmPasswordController,
                       label: 'Confirm password',
@@ -174,7 +215,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       icon: Icons.lock_reset_outlined,
                       obscureText: _obscureConfirm,
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (_) => _handleSignup(),
+                      onFieldSubmitted: (_) => _handleSubmit(),
                       validator: (value) => AuthValidators.confirmPassword(
                         value,
                         _passwordController.text,
@@ -194,17 +235,18 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    const _VerifyEmailNote(),
                     const SizedBox(height: AppSpacing.lg),
 
-                    // Submit
                     AuthPrimaryButton(
                       label: 'Create account',
-                      isLoading: _isLoading,
-                      onPressed: _handleSignup,
+                      isLoading: _isSubmitting,
+                      onPressed: _handleSubmit,
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
-                    // Footer link back to login
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -213,8 +255,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           style: AppTextStyles.bodyMuted,
                         ),
                         TextButton(
-                          onPressed: _isLoading ? null : _goToLogin,
-                          child: const Text('Log in'),
+                          onPressed: _isSubmitting ? null : _goToSignIn,
+                          child: const Text('Sign in'),
                         ),
                       ],
                     ),
@@ -224,6 +266,80 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SignUpException implements Exception {
+  const SignUpException(this.message);
+  final String message;
+  @override
+  String toString() => 'SignUpException: $message';
+}
+
+class _VerifyEmailNote extends StatelessWidget {
+  const _VerifyEmailNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.paleSignalBlue.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(AppRadii.input),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(
+            Icons.mark_email_unread_outlined,
+            color: AppColors.commandBlue,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              "We'll send a verification link to your email after you create your account.",
+              style: AppTextStyles.bodyMuted.copyWith(
+                color: AppColors.commandBlue,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubmissionErrorBanner extends StatelessWidget {
+  const _SubmissionErrorBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const ValueKey('signUpErrorBanner'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.criticalRed.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppRadii.input),
+        border: Border.all(color: AppColors.criticalRed.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.criticalRed),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.bodyMuted.copyWith(
+                color: AppColors.criticalRed,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
