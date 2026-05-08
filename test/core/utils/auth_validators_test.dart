@@ -7,7 +7,7 @@ void main() {
 
     test('accepts a valid student email', () {
       expect(
-        AuthValidators.universityEmail('nshimyimana_222023531@stud.ur.ac.rw'),
+        AuthValidators.universityEmail('student1@stud.ur.ac.rw'),
         isNull,
       );
     });

@@ -2,68 +2,37 @@
 
 ## Summary
 
-<!-- Describe the user-visible change this PR introduces. Keep it concise: what does the user see or experience after this PR is merged? -->
+<!-- Explain the user-visible or repo-level goal of this PR. -->
 
 ## Linked Issue
 
-<!-- Reference the driving issue using GitHub's auto-close syntax, e.g. Closes #12 -->
-
-Closes #
+<!-- Link the driving issue, for example: Closes #12 -->
 
 ## What Changed
 
-<!-- Bullet list of concrete code changes (files, widgets, logic). Be specific so reviewers can scan quickly. -->
-
--
--
--
+<!-- List the concrete implementation changes. -->
 
 ## Visual Evidence
 
-<!--
-Add screenshots, screen recordings, or exported design references for any UI change.
-For Flutter UI: include before/after where relevant, and cover both light and dark themes if applicable.
-If this PR has no UI impact, write: N/A — no UI change.
--->
+<!-- Add screenshots, recordings, or exported design references when UI changed. -->
 
 ## Test Evidence
 
-<!--
-Paste the commands you ran and the observed result.
-Examples:
-  flutter analyze
-  flutter test
-  flutter run -d chrome
--->
-
-**Commands run:**
-
-```
-```
-
-**Expected result:**
-
-<!-- Describe the behavior you verified (e.g. "Login screen renders, tapping Log in navigates to /home"). -->
+<!-- Paste the commands you ran and the outcome. -->
 
 ## Route and State Impact
 
-<!--
-Mention any changes to:
-  - Routes (added, renamed, removed) in app_routes.dart
-  - Navigator pushes / replacements
-  - State management (providers, controllers, notifiers)
-If none, write: N/A.
--->
+<!-- Describe affected routes, navigation changes, and any state or provider hooks added. -->
 
 ## Checklist
 
-- [ ] Linked issue referenced above
-- [ ] Tested locally (commands and result included under Test Evidence)
-- [ ] UI evidence added for visual changes (or marked N/A)
-- [ ] Routes updated if navigation changed (or marked N/A)
+- [ ] I linked the driving issue
+- [ ] I described the user-visible change
+- [ ] I added visual evidence for UI changes or marked it not applicable
+- [ ] I included fresh test evidence or explained why verification was not possible
+- [ ] I listed route or state impact, or marked it not applicable
+- [ ] I listed what remains out of scope
 
 ## Out of Scope
 
-<!-- List anything intentionally NOT included in this PR (follow-up tickets, deferred refactors, backend wiring, etc.). -->
-
--
+<!-- List follow-up work that is intentionally not part of this PR. -->
