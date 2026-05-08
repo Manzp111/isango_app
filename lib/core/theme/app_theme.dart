@@ -51,10 +51,10 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.cardWhite,
+        fillColor: AppColors.fieldFill,
         contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 12
+            vertical: 14
       ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.input),
@@ -67,14 +67,22 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.input),
           borderSide: const BorderSide(
-              color: AppColors.logisticsNavy,
+              color: AppColors.deepNavy,
               width: 2
           ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadii.input),
           borderSide: const BorderSide(
-              color: AppColors.criticalRed
+              color: AppColors.criticalRed,
+              width: 1.5,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadii.input),
+          borderSide: const BorderSide(
+              color: AppColors.criticalRed,
+              width: 2,
           ),
         ),),
       textTheme: const TextTheme(

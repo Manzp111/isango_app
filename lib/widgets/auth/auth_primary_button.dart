@@ -1,43 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:isango_app/core/theme/app_colors.dart';
-import 'package:isango_app/core/theme/app_radii.dart';
 
-/// Full-width, rounded primary button used across the auth flow.
-///
-/// When [isLoading] is true the label is replaced with a spinner and the
-/// button is disabled, providing a simple loading state simulation.
+/// Full-width, pill-shaped primary button used across the auth flow.
 class AuthPrimaryButton extends StatelessWidget {
   const AuthPrimaryButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
+    this.trailingIcon,
+    this.backgroundColor = AppColors.logisticsNavy,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final IconData? trailingIcon;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 52,
+      height: 56,
       child: FilledButton(
         onPressed: isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.logisticsNavy,
+          backgroundColor: backgroundColor,
           foregroundColor: AppColors.cardWhite,
-          disabledBackgroundColor:
-              AppColors.logisticsNavy.withValues(alpha: 0.6),
+          disabledBackgroundColor: backgroundColor.withValues(alpha: 0.6),
           disabledForegroundColor: AppColors.cardWhite,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadii.button),
-          ),
+          shape: const StadiumBorder(),
           textStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
           ),
+          elevation: 4,
+          shadowColor: backgroundColor.withValues(alpha: 0.25),
         ),
         child: isLoading
             ? const SizedBox(
@@ -49,7 +48,17 @@ class AuthPrimaryButton extends StatelessWidget {
                       AlwaysStoppedAnimation<Color>(AppColors.cardWhite),
                 ),
               )
-            : Text(label),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(label),
+                  if (trailingIcon != null) ...[
+                    const SizedBox(width: 8),
+                    Icon(trailingIcon, size: 20),
+                  ],
+                ],
+              ),
       ),
     );
   }

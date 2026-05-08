@@ -64,16 +64,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (widget.onSignUpComplete != null) {
         widget.onSignUpComplete!();
       } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Account created. Check your email to verify your account.',
-              ),
-            ),
-          );
-        Navigator.pushReplacementNamed(context, AppRoutes.login);
+        Navigator.pushReplacementNamed(
+          context,
+          AppRoutes.verifyEmail,
+          arguments: _emailController.text.trim(),
+        );
       }
     } catch (error) {
       if (!mounted) return;
@@ -115,40 +110,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.mistBackground,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _isSubmitting ? null : _handleBack,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
+        child: _SignUpTopBar(
+          onBack: _isSubmitting ? null : _handleBack,
         ),
-        title: const Text('Create account'),
       ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.page,
-              vertical: AppSpacing.lg,
+              vertical: AppSpacing.xl,
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
               child: Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Join the Isango community',
-                      style: AppTextStyles.display,
-                      textAlign: TextAlign.center,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                      ),
+                      child: Text(
+                        'Join your campus community to never miss an event.',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.mutedOperationalInk,
+                          fontSize: 16,
+                          height: 1.5,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Create an account to follow campus events and save the ones you care about.',
-                      style: AppTextStyles.bodyMuted,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.lg),
 
                     if (_submissionError != null) ...[
                       _SubmissionErrorBanner(message: _submissionError!),
@@ -157,8 +153,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     AuthTextField(
                       controller: _displayNameController,
-                      label: 'Display name',
-                      hint: 'Enter your full name',
+                      label: 'Full Name',
+                      hint: 'John Doe',
                       icon: Icons.person_outline,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
@@ -169,20 +165,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     AuthTextField(
                       controller: _emailController,
-                      label: 'Email',
-                      hint: 'student@ur.ac.rw',
-                      icon: Icons.email_outlined,
+                      label: 'University Email',
+                      hint: 'name_studentid@stud.ur.ac.rw',
+                      icon: Icons.mail_outline,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
-                      validator: AuthValidators.email,
+                      validator: AuthValidators.universityEmail,
                     ),
                     const SizedBox(height: AppSpacing.md),
 
                     AuthTextField(
                       controller: _passwordController,
                       label: 'Password',
-                      hint: 'At least 6 characters',
+                      hint: '••••••••',
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
@@ -194,8 +190,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             : 'Hide password',
                         icon: Icon(
                           _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
                           color: AppColors.mutedOperationalInk,
                         ),
                         onPressed: () => setState(
@@ -207,12 +203,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                     AuthTextField(
                       controller: _confirmPasswordController,
-                      label: 'Confirm password',
-                      hint: 'Re-enter your password',
+                      label: 'Confirm Password',
+                      hint: '••••••••',
                       icon: Icons.lock_reset_outlined,
                       obscureText: _obscureConfirm,
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _handleSubmit(),
+                      revalidateOn: _passwordController,
                       validator: (value) => AuthValidators.confirmPassword(
                         value,
                         _passwordController.text,
@@ -223,8 +220,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             : 'Hide password',
                         icon: Icon(
                           _obscureConfirm
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
                           color: AppColors.mutedOperationalInk,
                         ),
                         onPressed: () => setState(
@@ -232,15 +229,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-
-                    const _VerifyEmailNote(),
                     const SizedBox(height: AppSpacing.lg),
 
                     AuthPrimaryButton(
-                      label: 'Create account',
+                      label: 'Create Account',
                       isLoading: _isSubmitting,
                       onPressed: _handleSubmit,
+                      trailingIcon: Icons.arrow_forward,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xl,
+                      ),
+                      child: Text(
+                        'We will send you a verification link to your email after you sign up.',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.bodyMuted.copyWith(
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
@@ -248,12 +257,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Already have an account?',
-                          style: AppTextStyles.bodyMuted,
+                          'Already have an account? ',
+                          style: AppTextStyles.bodyMuted.copyWith(
+                            color: AppColors.nearBlackInk,
+                            fontSize: 15,
+                          ),
                         ),
-                        TextButton(
-                          onPressed: _isSubmitting ? null : _goToSignIn,
-                          child: const Text('Sign in'),
+                        GestureDetector(
+                          onTap: _isSubmitting ? null : _goToSignIn,
+                          child: const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              color: AppColors.commandBlue,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -275,34 +294,82 @@ class SignUpException implements Exception {
   String toString() => 'SignUpException: $message';
 }
 
-class _VerifyEmailNote extends StatelessWidget {
-  const _VerifyEmailNote();
+class _SignUpTopBar extends StatelessWidget {
+  const _SignUpTopBar({required this.onBack});
+
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.paleSignalBlue.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(AppRadii.input),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.mark_email_unread_outlined,
-            color: AppColors.commandBlue,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              "We'll send a verification link to your email after you create your account.",
-              style: AppTextStyles.bodyMuted.copyWith(
-                color: AppColors.commandBlue,
-              ),
-            ),
+        color: AppColors.cardWhite,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: SizedBox(
+          height: 64,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+            child: Row(
+              children: [
+                _CircularIconButton(
+                  icon: Icons.arrow_back,
+                  onPressed: onBack,
+                ),
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'Create Account',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.logisticsNavy,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 40),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CircularIconButton extends StatelessWidget {
+  const _CircularIconButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: const Icon(
+            Icons.arrow_back,
+            color: AppColors.logisticsNavy,
+            size: 24,
+          ),
+        ),
       ),
     );
   }

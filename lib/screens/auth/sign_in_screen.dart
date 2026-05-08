@@ -92,7 +92,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final maxWidth = size.width > 520.0 ? 480.0 : size.width;
+    final maxWidth = size.width > 520.0 ? 460.0 : size.width;
 
     return Scaffold(
       backgroundColor: AppColors.mistBackground,
@@ -105,101 +105,125 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: maxWidth),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const _IsangoWordmark(),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'Welcome back!',
-                      style: AppTextStyles.display,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      'Sign in to discover and follow campus events across UR.',
-                      style: AppTextStyles.bodyMuted,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-
-                    if (_submissionError != null) ...[
-                      _SubmissionErrorBanner(message: _submissionError!),
+              child: _SignInCard(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const _IsangoWordmark(),
                       const SizedBox(height: AppSpacing.md),
-                    ],
-
-                    AuthTextField(
-                      controller: _emailController,
-                      label: 'Email',
-                      hint: 'student@ur.ac.rw',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      validator: AuthValidators.email,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-
-                    AuthTextField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      icon: Icons.lock_outline,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      onFieldSubmitted: (_) => _handleSubmit(),
-                      validator: AuthValidators.password,
-                      suffix: IconButton(
-                        tooltip: _obscurePassword
-                            ? 'Show password'
-                            : 'Hide password',
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                          color: AppColors.mutedOperationalInk,
+                      const Text(
+                        'Welcome back!',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.nearBlackInk,
+                          letterSpacing: -0.5,
                         ),
-                        onPressed: () => setState(
-                          () => _obscurePassword = !_obscurePassword,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: _isSubmitting ? null : _handleForgotPassword,
-                        child: const Text('Forgot password?'),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Sign in to access your personalized campus events feed.',
+                        style: AppTextStyles.bodyMuted.copyWith(fontSize: 15),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Signing in gives you access to your saved events, RSVPs, and reminders.',
+                        style: AppTextStyles.bodyMuted.copyWith(fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-                    AuthPrimaryButton(
-                      label: 'Sign in',
-                      isLoading: _isSubmitting,
-                      onPressed: _handleSubmit,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account?",
-                          style: AppTextStyles.bodyMuted,
-                        ),
-                        TextButton(
-                          onPressed: _isSubmitting ? null : _goToSignUp,
-                          child: const Text('Sign up'),
-                        ),
+                      if (_submissionError != null) ...[
+                        _SubmissionErrorBanner(message: _submissionError!),
+                        const SizedBox(height: AppSpacing.md),
                       ],
-                    ),
-                  ],
+
+                      AuthTextField(
+                        controller: _emailController,
+                        label: 'Email Address',
+                        hint: 'name_studentid@stud.ur.ac.rw',
+                        icon: Icons.mail_outline,
+                        keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        autofillHints: const [AutofillHints.email],
+                        validator: AuthValidators.universityEmail,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      AuthTextField(
+                        controller: _passwordController,
+                        label: 'Password',
+                        hint: 'Enter your password',
+                        icon: Icons.lock_outline,
+                        obscureText: _obscurePassword,
+                        textInputAction: TextInputAction.done,
+                        autofillHints: const [AutofillHints.password],
+                        onFieldSubmitted: (_) => _handleSubmit(),
+                        validator: AuthValidators.password,
+                        trailing: GestureDetector(
+                          onTap: _isSubmitting ? null : _handleForgotPassword,
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: AppColors.commandBlue,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        suffix: IconButton(
+                          tooltip: _obscurePassword
+                              ? 'Show password'
+                              : 'Hide password',
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                            color: AppColors.mutedOperationalInk,
+                          ),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      AuthPrimaryButton(
+                        label: 'Sign In',
+                        isLoading: _isSubmitting,
+                        onPressed: _handleSubmit,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account? ",
+                            style: AppTextStyles.bodyMuted.copyWith(
+                              color: AppColors.nearBlackInk,
+                              fontSize: 15,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: _isSubmitting ? null : _goToSignUp,
+                            child: const Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                color: AppColors.commandBlue,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -217,36 +241,49 @@ class SignInException implements Exception {
   String toString() => 'SignInException: $message';
 }
 
+class _SignInCard extends StatelessWidget {
+  const _SignInCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xl,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.cardWhite,
+        borderRadius: BorderRadius.circular(AppRadii.card + 8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
 class _IsangoWordmark extends StatelessWidget {
   const _IsangoWordmark();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Container(
-        //   width: 64,
-        //   height: 64,
-        //   decoration: BoxDecoration(
-        //     color: AppColors.logisticsNavy,
-        //     borderRadius: BorderRadius.circular(AppRadii.card),
-        //   ),
-        //   alignment: Alignment.center,
-        //   child: const Icon(
-        //     Icons.event_available,
-        //     color: AppColors.cardWhite,
-        //     size: 32,
-        //   ),
-        // ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          'Isango Login Portal',
-          style: AppTextStyles.headline.copyWith(
-            color: AppColors.logisticsNavy,
-            letterSpacing: 1.2,
-          ),
-        ),
-      ],
+    return const Text(
+      'Isango',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.w900,
+        color: AppColors.deepNavy,
+        // fontStyle: FontStyle.italic,
+        letterSpacing: -0.5,
+      ),
     );
   }
 }

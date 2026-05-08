@@ -6,6 +6,10 @@ class AuthValidators {
   static final RegExp _emailRegex =
       RegExp(r'^[\w.\-+]+@([\w\-]+\.)+[\w\-]{2,}$');
 
+  // University email format: e.g. nshimyimana_222023531@stud.ur.ac.rw
+  static final RegExp _universityEmailRegex =
+      RegExp(r'^[\w.\-]+@stud\.ur\.ac\.rw$', caseSensitive: false);
+
   static String? requiredField(String? value, {String label = 'This field'}) {
     if (value == null || value.trim().isEmpty) {
       return '$label is required';
@@ -17,6 +21,15 @@ class AuthValidators {
     final v = value?.trim() ?? '';
     if (v.isEmpty) return 'Email is required';
     if (!_emailRegex.hasMatch(v)) return 'Enter a valid email address';
+    return null;
+  }
+
+  static String? universityEmail(String? value) {
+    final v = value?.trim() ?? '';
+    if (v.isEmpty) return 'Email is required';
+    if (!_universityEmailRegex.hasMatch(v)) {
+      return 'Please use a valid university email address';
+    }
     return null;
   }
 
