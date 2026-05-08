@@ -27,10 +27,9 @@ class AuthValidators {
     return null;
   }
 
-  static String? fullName(String? value) {
+  static String? displayName(String? value) {
     final v = value?.trim() ?? '';
-    if (v.isEmpty) return 'Full name is required';
-    if (v.length < 2) return 'Enter your full name';
+    if (v.isEmpty) return 'Display name is required';
     return null;
   }
 

@@ -158,15 +158,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     AuthTextField(
                       controller: _displayNameController,
                       label: 'Display name',
-                      hint: 'How should we greet you?',
+                      hint: 'Enter your full name',
                       icon: Icons.person_outline,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.name],
-                      validator: (value) => AuthValidators.requiredField(
-                        value,
-                        label: 'Display name',
-                      ),
+                      validator: AuthValidators.displayName,
                     ),
                     const SizedBox(height: AppSpacing.md),
 

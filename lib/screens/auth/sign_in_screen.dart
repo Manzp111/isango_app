@@ -114,7 +114,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     const _IsangoWordmark(),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
-                      'Welcome back',
+                      'Welcome back!',
                       style: AppTextStyles.display,
                       textAlign: TextAlign.center,
                     ),
@@ -224,23 +224,23 @@ class _IsangoWordmark extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.logisticsNavy,
-            borderRadius: BorderRadius.circular(AppRadii.card),
-          ),
-          alignment: Alignment.center,
-          child: const Icon(
-            Icons.event_available,
-            color: AppColors.cardWhite,
-            size: 32,
-          ),
-        ),
+        // Container(
+        //   width: 64,
+        //   height: 64,
+        //   decoration: BoxDecoration(
+        //     color: AppColors.logisticsNavy,
+        //     borderRadius: BorderRadius.circular(AppRadii.card),
+        //   ),
+        //   alignment: Alignment.center,
+        //   child: const Icon(
+        //     Icons.event_available,
+        //     color: AppColors.cardWhite,
+        //     size: 32,
+        //   ),
+        // ),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Isango',
+          'Isango Login Portal',
           style: AppTextStyles.headline.copyWith(
             color: AppColors.logisticsNavy,
             letterSpacing: 1.2,
